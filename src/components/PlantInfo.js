@@ -25,6 +25,7 @@ class PlantInfo extends Component {
         formSuccess: false,
         submitDisabled: true,
         isNewRecord: false,
+        isLogin: false,
     }
     constructor() {
         super();
@@ -34,7 +35,9 @@ class PlantInfo extends Component {
         this.handleDelete = this.handleDelete.bind(this);
         this.handleUpdate = this.handleUpdate.bind(this);
         this.handleBack = this.handleBack.bind(this);
+        this.openLogin = this.openLogin.bind(this);
     }
+
     changeFamilyHandler(fam) {
         this.setState({ family: fam });
         if (this.state.family !== "") this.setState({ submitDisabled: false, isUpdated: false })
@@ -53,14 +56,14 @@ class PlantInfo extends Component {
     }
 
     submitHandler(event) {
-       
+       event.preventDefault();
         this.handleUpdate();
 
 
     }
     handleDelete() {
         console.log("deleting: " + this.state.species);
-        axios.delete("https://s.ics.upjs.sk/mmarcincin_api/api/plants/" + this.state.plant.id).then(res => console.log(res));
+        axios.delete(global.url + this.state.plant.id, {headers: { Authorization: "Bearer " + global.token }}).then(res => console.log(res));
 
         this.setState({
             formSuccess: true,
@@ -69,6 +72,7 @@ class PlantInfo extends Component {
             species: "",
             authority: "",
             notice: "",
+            isLogged: false
         })
         this.setState({ isDeleted: true });
         this.props.delFromList(this.state.plant.id);
@@ -83,7 +87,7 @@ class PlantInfo extends Component {
             "notice": this.state.notice,
         }
         console.log("updating: " + updatingPlant);
-        axios.put("https://s.ics.upjs.sk/mmarcincin_api/api/plants/" + this.state.plant.id, updatingPlant).then(res => this.setState({
+        axios.put(global.url + this.state.plant.id, updatingPlant,{headers: { Authorization: "Bearer " + global.token }}).then(res => this.setState({
             formSuccess: true,
             family: res.data.family,
             genus: res.data.genus,
@@ -100,7 +104,7 @@ class PlantInfo extends Component {
         this.setState({ isUpdated: true });
     }
     reloadRecords() {
-        axios.get("https://s.ics.upjs.sk/mmarcincin_api/api/plants/" + this.props.plant.id + "/records")
+        axios.get(global.url + this.props.plant.id + "/records",)
             .then(response => {
                 this.setState({
                     records: response.data
@@ -116,9 +120,15 @@ class PlantInfo extends Component {
             species: this.props.plant.species,
             authority: this.props.plant.authority,
             notice: this.props.plant.notice,
+            isLogged: this.props.isLogged,
         })
+        console.log(this.props);
+        if (global.token!="") {this.setState({isLogged:true})} else {this.setState({isLogged:false})};
         this.reloadRecords();
 
+    }
+    setLogged(){
+        this.setState({isLogged:true})
     }
     recordClicked(record) {
         this.setState({ isRecord: true, record: record });
@@ -128,6 +138,30 @@ class PlantInfo extends Component {
     }
     deleteRecordFromList(record) {
         let recordss = this.state.records.filter; /*???????????????*/
+    }
+    openEdit(){
+        if(global.token!=""){
+            this.setState({ isDeleteModal: false, isUpdateModal: true })
+            } else {
+                this.props.openLogin()
+            }
+    }
+    openDelete(){
+        if(global.token!=""){
+        this.setState({ isDeleteModal: true, isUpdateModal: false })
+        } else {
+            this.props.openLogin()
+        }
+    }
+    openLogin(){
+        this.props.openLogin()
+    }
+    openAddRec(){
+        if(global.token!=""){
+            this.setState({ isNewRecord: true })
+            }else {
+                this.props.openLogin()
+            }
     }
     render() {
         let records = this.state.records.map((record) => {
@@ -141,6 +175,7 @@ class PlantInfo extends Component {
                     <td>{record.number}</td>
                     <td>{record.indexType}</td>
                     <td>{record.tissue}</td>
+
                     { /*   <td>{plant.createdAt}</td>
                     <td>{plant.updatedAt}</td> */ }
                     <td><Button onClick={() => this.recordClicked(record)}>Open</Button></td>
@@ -157,16 +192,18 @@ class PlantInfo extends Component {
             <div>
                 {this.state.isRecord ? (
                     <RecordInfo plant={this.state.plant} record={this.state.record} handleBack={() => this.handleBack()}
-                        delFromList={() => this.deleteRecordFromList()} reload={() => this.reloadRecords()} />
+                        delFromList={() => this.deleteRecordFromList()} reload={() => this.reloadRecords()} openLogin={this.props.openLogin}/>
                 ) : (
 
                         <div>
-                            <h2> {this.state.plant.genus+ " "+this.state.plant.species}</h2>
-                            <h4> {this.state.plant.family}</h4>
                             <h4>{"ID: "+this.state.plant.id}</h4>
-                            <Button onClick={() => this.setState({ isDeleteModal: true, isUpdateModal: false })}>Delete</Button>
-                            <Button onClick={() => this.setState({ isDeleteModal: false, isUpdateModal: true })}>Edit</Button>
-                            <Button onClick={() => this.setState({ isNewRecord: true })}>Add new record</Button>
+                            <h4> {this.state.plant.family}</h4>
+                            <h2> {this.state.plant.genus+ " "+this.state.plant.species}</h2>
+                            <h4>{"Authority: "+this.state.plant.authority}</h4>
+                            <h4>{"Notice: "+this.state.plant.notice}</h4>
+                            <Button onClick={() => this.openDelete()}>Delete</Button>
+                            <Button onClick={() => this.openEdit()}>Edit</Button>
+                            <Button onClick={() => this.openAddRec()}>Add new record</Button>
                             {this.state.isNewRecord ? (
                                 <AddRecord handleBack={() => this.handleBack()} plant={this.state.plant} reload={() => this.reloadRecords()} />
                             ) : (<div></div>)}
@@ -234,7 +271,7 @@ class PlantInfo extends Component {
                                                 <br />
 
                                                 {/*<input type="submit" value="Update" disabled={this.state.submitDisabled} />*/}
-                                                <Button id="buttonImportant" onClick={() => { this.submitHandler() }} disabled={this.state.submitDisabled}>Update species</Button>
+                                                <Button id="buttonImportant" type="submit" disabled={this.state.submitDisabled}>Update species</Button>
                                             </Form>
                                             {this.state.isUpdated ? (
                                                 <div>

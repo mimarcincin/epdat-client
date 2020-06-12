@@ -11,19 +11,30 @@ class PlantsTab extends Component {
         isPlant: false,
         plant:{},
     }
+    constructor(){
+        super()
+        this.openLogin = this.openLogin.bind(this)
+    }
     deletePlant(delPlant) {
         let plantsList = this.state.plants.filter((item) => item.id == delPlant); /*???????????????*/
     }
     findIt() {
-        let finalUrl = "https://s.ics.upjs.sk/mmarcincin_api/api/plants/" + this.props.searchInfo.finder + "/" + this.props.searchInfo.family + "/";
-        if (this.props.genus != "") finalUrl += this.props.searchInfo.genus + "/";
-        if (this.props.species != "") finalUrl += this.props.searchInfo.species + "/";
-        if (this.props.tissue != "") finalUrl += this.props.searchInfo.tissue + "/";
-
+        let finalUrl = global.url + this.props.searchInfo.finder
+        switch(this.props.searchInfo.finder){
+        case "F" : finalUrl+="/"+this.props.searchInfo.family;console.log("final url: "+ finalUrl);break;
+        case "G" : finalUrl+="/"+this.props.searchInfo.genus;console.log("final url: "+ finalUrl);break;
+        case "S" : finalUrl+="/"+this.props.searchInfo.species;console.log("final url: "+ finalUrl);break;
+        case "T" : finalUrl+="/"+this.props.searchInfo.tissue;console.log("final url: "+ finalUrl);break;
+        case "FT" : finalUrl+="/"+this.props.searchInfo.family+"/"+this.props.searchInfo.tissue;console.log("final url: "+ finalUrl);break;
+        case "GT" : finalUrl+="/"+this.props.searchInfo.genus+"/"+this.props.searchInfo.tissue;break;
+        }
+        console.log("final url: "+ finalUrl);
+      //  finalUrl = finalUrl.slice(0, -1);
+        console.log("final url: "+ finalUrl);
         return finalUrl;
     }
     reload() {
-        axios.get(this.findIt())
+        axios.get(this.findIt(), {headers:{"Access-Control-Allow-Origin" : "*"}})
             .then(response => {
                 this.setState({
                     plants: response.data
@@ -31,7 +42,9 @@ class PlantsTab extends Component {
             });
     }
 
-
+    openLogin(){
+        this.props.openLogin()
+    }
     componentDidMount() {
         this.setState({ isPlant: false });
         this.reload();
@@ -50,9 +63,9 @@ class PlantsTab extends Component {
             return (
                 <tr key={plant.id} >
                     <td>{plant.id}</td>
+                    <td>{plant.family}</td>
                     <td>{plant.species}</td>
                     <td>{plant.genus}</td>
-                    <td>{plant.family}</td>
                     <td>{plant.authority}</td>
                     <td>{plant.notice}</td>
                     { /*   <td>{plant.createdAt}</td>
@@ -67,7 +80,8 @@ class PlantsTab extends Component {
             <div className="App container">
                 {this.state.isPlant ? (
                     <div class="divClassic">
-                        <PlantInfo plant={this.state.plant} handleBack={() => this.handleBackPlants()} delFromList={() => this.deletePlant()} reload={()=>{this.reload()}} />
+                        <PlantInfo plant={this.state.plant} handleBack={() => this.handleBackPlants()} delFromList={() => this.deletePlant()} 
+                        reload={()=>{this.reload()}} openLogin={this.props.openLogin}/>
                         <hr/>
                         <Button onClick={() => this.handleBackPlants()}>Back to plants</Button>
                         <br/>
@@ -79,9 +93,9 @@ class PlantsTab extends Component {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Species</th>
-                                        <th>Genos</th>
                                         <th>Family</th>
+                                        <th>Genus</th>
+                                        <th>Species</th>
                                         <th>Authority</th>
                                         <th>Notice</th>
                                         <th/>

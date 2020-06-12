@@ -13,6 +13,7 @@ class AddRecord extends Component {
         indexType: "",
         tissue: "",
         chromosomeNumber: "",
+        source: "",
         plant: {},
         submitDisabled: true,
         formSuccess: false,
@@ -33,7 +34,7 @@ class AddRecord extends Component {
         if (this.state.endopolyploidy !== "" && this.state.tissue !== "") { this.setState({ submitDisabled: false }) } else { this.setState({ submitDisabled: true }) }
     }
     submitHandler(event){
-       
+       event.preventDefault();
         let record = {
             "endopolyploidy": this.state.endopolyploidy,
             "ploidyLevel": this.state.ploidyLevel,
@@ -41,8 +42,9 @@ class AddRecord extends Component {
             "indexType": this.state.indexType,
             "tissue": this.state.tissue,
             "chromosomeNumber": this.state.chromosomeNumber,
+            "source": this.state.source
         }
-        Axios.post("https://s.ics.upjs.sk/mmarcincin_api/api/plants/"+this.state.plant.id+"/records", record).then(res => console.log(res));
+        Axios.post(global.url+this.state.plant.id+"/records", record,{headers: { Authorization: "Bearer " + global.token }}).then(res => console.log(res));
         this.setState({
             formSuccess : true,
             endopolyploidy: "",
@@ -51,6 +53,7 @@ class AddRecord extends Component {
             indexType: "",
             tissue: "",
             chromosomeNumber: "",
+            source: "",
             submitDisabled: true,
         })
 
@@ -77,11 +80,11 @@ class AddRecord extends Component {
                                             
                             Ploidy Level:
                             <br />
-                            <input id="ploidyInput" type="number" name="ploidyLevel" onChange={this.changeHandler} value ={this.state.ploidyLevel}/>
+                            <input id="ploidyInput" type="number"  name="ploidyLevel" onChange={this.changeHandler} value ={this.state.ploidyLevel}/>
                                             <br />
                             Number:
                             <br />
-                            <input id="numberInput" type="number" name="number" onChange={this.changeHandler} value = {this.state.number}/>
+                            <input id="numberInput" type="number" step="0.01" name="number" onChange={this.changeHandler} value = {this.state.number}/>
                                             <br />
                             Index Type:
                             <br />
@@ -93,12 +96,14 @@ class AddRecord extends Component {
                                             <br />
                             Chromosome number:
                             <br />
-                            
                             <input id="chromosomeInput" type="text" name="chromosomeNumber" onChange={this.changeHandler} value = {this.state.chromosomeNumber}/> 
+                            <br/>
+                            Source:
+                            <br />
+                            <input id="sourceInput" type="text" name="source" onChange={this.changeHandler} value = {this.state.source}/> 
                                         </label>
                                         <br />
-                                        <Button id="buttonImportant" onClick={() => { this.submitHandler() }} disabled={this.state.submitDisabled}>Add record</Button>
-                                       {/* <input type="submit" value="Add Record" disabled={this.state.submitDisabled} />*/}
+                                        <Button type="submit" id="buttonImportant" disabled={this.state.submitDisabled}>Add record</Button>
                                        <br/>
                                         <Button onClick={() => {this.props.handleBack(); this.props.reload()}}>Back</Button>
                                     </Form>

@@ -11,6 +11,7 @@ class RecordInfo extends Component {
         isDeleted: false,
         isDeleteRecord: false,
         isUpdateRecord: false,
+        isLogged: false,
     }
     constructor() {
         super();
@@ -19,7 +20,7 @@ class RecordInfo extends Component {
     }
     handleDelete() {
         console.log("deleting record");
-        axios.delete("https://s.ics.upjs.sk/mmarcincin_api/api/plants/" + this.state.plant.id + "/records/" + this.state.record.id).then(res => console.log(res));
+        axios.delete(global.url + this.state.plant.id + "/records/" + this.state.record.id,{headers: { Authorization: "Bearer " + global.token }}).then(res => console.log(res));
         this.setState({ isDeleted: true });
         this.props.delFromList(this.state.plant.id);
     }
@@ -34,12 +35,29 @@ class RecordInfo extends Component {
     }
 
     componentDidMount() {
-        this.setState({ plant: this.props.plant, record: this.props.record });
+        this.setState({ plant: this.props.plant, record: this.props.record, isLogged:this.props.isLogged });
         console.log("Plant from RecordInfo: " + this.state.plant.id);
         console.log("Record from RecordInfo: " + this.state.record.id);
+
     }
     handleBackToRecord() {
-        this.setState({ isUpdateRecord: false })
+       this.setState({ isUpdateRecord: false })
+    }
+    openDelete(){
+        if(global.token!=""){
+            this.setState({ isDeleteRecord: true })
+            } else {
+                this.props.openLogin()
+            }
+        
+    }
+    openEdit(){
+       
+        if(global.token!=""){
+            this.setState({ isUpdateRecord: true })
+            } else {
+                this.props.openLogin()
+            }
     }
     render() {
 
@@ -54,13 +72,14 @@ class RecordInfo extends Component {
                 <h6>{"Index type: "+this.state.record.indexType}</h6>
                 <h6>{"Tissue: "+this.state.record.tissue}</h6>
                 <h6>{"Chromosome number: "+this.state.record.chromosomeNumber}</h6>
+                <h6>{"Source: "+this.state.record.source}</h6>
                 <h6>{"Created at: "+this.state.record.createdAt}</h6>
                 <h6>{"Updated at: "+this.state.record.updatedAt}</h6>
                 <br />
 
 
-                <Button onClick={() => this.setState({ isDeleteRecord: true })}>Delete</Button>
-                <Button onClick={() => this.setState({ isUpdateRecord: true })}>Edit</Button>
+                <Button onClick={() => this.openDelete()} >Delete</Button>
+                <Button onClick={() => this.openEdit()} >Edit</Button>
                 <br />
                 <hr />
                 <Button onClick={() => { this.props.handleBack(); this.props.reload() }}>Back</Button>

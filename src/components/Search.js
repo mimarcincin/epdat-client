@@ -28,19 +28,16 @@ class SearchForm extends Component {
         familyList: families,
         isPlants: false,
         finder: "",
-        genusDis: true,
-        speciesDis: true,
-        tissueDis: true,
-        submitDis: true,
     }
     submitHandler(event) {
        /* event.preventDefault();*/
 
-        let finalFinder = "F";
-
-        if (this.state.genus != "") finalFinder += "G";
-        if (this.state.species != "") finalFinder += "S";
+        let finalFinder = "";
+        if (this.state.family != "") finalFinder = "F";
+        if (this.state.genus != "") finalFinder = "G";
         if (this.state.tissue != "") finalFinder += "T";
+        if (this.state.species != "") finalFinder = "S";
+        
 
         this.setState({ finder: finalFinder, isPlants: !this.state.isPlants });
 
@@ -49,14 +46,11 @@ class SearchForm extends Component {
         let name = event.target.name;
         let value = event.target.value;
         this.setState({ [name]: value })
-        if (this.state.genus != "")
-            this.setState({ speciesDis: false })
 
     }
     changeFamilyHandler(fam) {
         this.setState({ family: fam });
-        this.setState({ genusDis: false, tissueDis: false, submitDis: false })
-
+    
     }
     handleBack() {
         this.setState({ isPlants: !this.state.isPlants })
@@ -67,9 +61,6 @@ class SearchForm extends Component {
             genus: "",
             species: "",
             tissue: "",
-            genusDis: true,
-            speciesDis: true,
-            tissueDis: true
         })
     }
     render() {
@@ -88,27 +79,26 @@ class SearchForm extends Component {
                             
                             Genus:
                             <br />
-                            <input id="genusInput" type="text" name="genus" onChange={this.changeHandler} value={this.state.genus} disabled={this.state.genusDis} />
+                            <input id="genusInput" type="text" name="genus" onChange={this.changeHandler} value={this.state.genus} />
                             <br />
                             Species:
                             <br />
-                            <input id="speciesInput" type="text" name="species" onChange={this.changeHandler} value={this.state.species} disabled={this.state.speciesDis} />
+                            <input id="speciesInput" type="text" name="species" onChange={this.changeHandler} value={this.state.species}  />
                             <br />
                             Tissue:
                             <br />
-                            <input id="tissueInput" type="text" name="tissue" onChange={this.changeHandler} value={this.state.tissue} disabled={this.state.tissueDis} />
+                            <input id="tissueInput" type="text" name="tissue" onChange={this.changeHandler} value={this.state.tissue} />
                         </label>
                         <br />
                         <Button onClick={() => { this.clearSearch() }}>Clear</Button>
-                     {/*   <input class="button" type="submit" value="Search" disabled={this.state.submitDis} />*/}
-                        <Button id="buttonImportant" onClick={() => { this.submitHandler() }} disabled={this.state.submitDis}>Search</Button>
-
-
+                        <Button id="buttonImportant" onClick={() => { this.submitHandler() }} >Search</Button>
+                        
+                        
 
 
                     </Form>) : (
                         <div class="divClassic">
-                            <PlantsTab searchInfo={this.addSearchInfo()} />
+                            <PlantsTab searchInfo={this.addSearchInfo()} openLogin={this.props.openLogin}/>
                             <hr/>
                             <Button onClick={() => { this.handleBack() }}>Back to search</Button>
                             

@@ -15,6 +15,7 @@ class EditRecord extends Component {
         indexType: "",
         tissue: "",
         chromosomeNumber: "",
+        source: "",
         plant: {},
         submitDisabled: true,
         formSuccess: false,
@@ -34,6 +35,7 @@ class EditRecord extends Component {
             indexType: this.props.record.indexType,
             tissue: this.props.record.tissue,
             chromosomeNumber: this.props.record.chromosomeNumber,
+            source: this.props.record.source,
             plant: this.props.plant
         })
     }
@@ -43,7 +45,7 @@ class EditRecord extends Component {
         this.setState({ [name]: value, formSuccess: false })
         console.log(this.state[name]);
         if (this.state.endopolyploidy !== "" || this.state.tissue !== "" || this.state.ploidyLevel !== "" || this.state.indexType !== ""
-            || this.state.number !== "" || this.state.chromosomeNumber !== ""
+            || this.state.number !== "" || this.state.chromosomeNumber !== "" || this.state.source !== ""
         ) { this.setState({ submitDisabled: false }) } else { this.setState({ submitDisabled: true }) }
     }
 
@@ -56,8 +58,9 @@ class EditRecord extends Component {
             "indexType": this.state.indexType,
             "tissue": this.state.tissue,
             "chromosomeNumber": this.state.chromosomeNumber,
+            "source": this.state.source,
         }
-        Axios.put("https://s.ics.upjs.sk/mmarcincin_api/api/plants/" + this.props.plant.id + "/records/" + this.props.record.id, rec).then(
+        Axios.put(global.url + this.props.plant.id + "/records/" + this.props.record.id, rec,{headers: { Authorization: "Bearer " + global.token }}).then(
             res => this.props.update(res.data));
         this.setState({
             formSuccess: false,
@@ -67,6 +70,7 @@ class EditRecord extends Component {
             indexType: "",
             tissue: "",
             chromosomeNumber: "",
+            source: "",
             submitDisabled: true,
 
         })
@@ -93,12 +97,12 @@ class EditRecord extends Component {
                         <br />
                             Ploidy Level:
                             <br />
-                        <input id="ploidyInput" type="number" name="ploidyLevel" onChange={this.changeHandler}
+                        <input id="ploidyInput" type="number"  name="ploidyLevel" onChange={this.changeHandler}
                             placeholder={this.state.ploidyLevel} />
                         <br />
                             Number:
                             <br />
-                        <input id="numberInput" type="number" name="number" onChange={this.changeHandler}
+                        <input id="numberInput" type="number" step="0.01" name="number" onChange={this.changeHandler}
                             placeholder={this.state.number} />
                         <br />
                             Index Type:
@@ -113,10 +117,16 @@ class EditRecord extends Component {
                         <br />
                             Chromosome number:
                             <br />
+                            
                         <input id="chromosomeInput" type="text" name="chromosomeNumber" onChange={this.changeHandler}
                             placeholder={this.state.chromosomeNumber} />
+                         <br />
+                         
+                            Source:
+                            <br />
+                        <input id="sourceInput" type="text" name="source" onChange={this.changeHandler} placeholder = {this.state.source}/> 
                     </label>
-                    <Button id="buttonImportant" onClick={() => { this.submitHandler() }} disabled={this.state.submitDisabled}>Update record</Button>
+                    <Button id="buttonImportant" type="submit" disabled={this.state.submitDisabled}>Update record</Button>
 
                     {/*<input type="submit" value="Update Record" disabled={this.state.submitDisabled} />*/}
                     <br />

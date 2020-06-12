@@ -39,7 +39,7 @@ class AddPlantModal extends Component {
         if (this.state.family !== "" && this.state.genus !== "" && this.state.species !== "" && this.state.authority !== "") { this.setState({ submitDisabled: false }) } else { this.setState({ submitDisabled: true }) }
     }
     submitHandler(event) {
-        /*event.preventDefault();*/
+        event.preventDefault();
         let plant = {
             "family": this.state.family,
             "genus": this.state.genus,
@@ -47,7 +47,9 @@ class AddPlantModal extends Component {
             "authority": this.state.authority,
             "notice": this.state.notice,
         }
-        Axios.post("https://s.ics.upjs.sk/mmarcincin_api/api/plants/", plant).then(res => console.log(res));
+        Axios.post(global.url, plant, {
+            headers: { Authorization: "Bearer " + global.token }
+        }).then(res => console.log(res));
         this.setState({
             formSuccess: true,
             genus: "",
@@ -91,10 +93,10 @@ class AddPlantModal extends Component {
                             <input id="noticeInput" type="text" name="notice" onChange={this.changeHandler} value={this.state.notice} />
 
                         </label>
-                        <br />
+                        
 
                         {/*<input type="submit" value="Add Plant" disabled={this.state.submitDisabled} />*/}
-                        <Button id="buttonImportant" onClick={() => { this.submitHandler() }} disabled={this.state.submitDisabled}>Add new species</Button>
+                        <Button id="buttonImportant" type="submit" disabled={this.state.submitDisabled}>Add new species</Button>
                     </Form>
                     {(this.state.formSuccess) ? (
                         < Alert color="success">Plant successfully added!</Alert>
